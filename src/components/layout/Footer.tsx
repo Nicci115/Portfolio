@@ -13,7 +13,7 @@ export const Footer = () => {
             className="w-8 h-8 opacity-50 grayscale hover:grayscale-0 transition-all"
           />
           <span className="text-sm text-zinc-500">
-            © {currentYear} {portfolio.identity.name}. All rights reserved.
+            &copy; {currentYear} {portfolio.identity.name}. All rights reserved.
           </span>
         </div>
         

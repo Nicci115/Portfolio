@@ -347,15 +347,22 @@ export const Showcase = () => {
                                         >
                                           <div className="px-4 pb-4 pt-2 space-y-4 border-t border-zinc-800/50">
                                             {items.length > 0 ? (
-                                              items.map((item) => (
+                                              items.map((item) => {
+                                                const commitBadge = /^[0-9a-f]{7,40}$/i.test(item.commit)
+                                                  ? item.commit.slice(0, 7)
+                                                  : null;
+
+                                                return (
                                                 <div key={item.id} className="rounded-lg border border-zinc-800 bg-zinc-950 p-4 space-y-3">
                                                   <div className="flex items-start justify-between gap-4">
                                                     <p className="text-sm text-zinc-200 font-medium leading-relaxed">
                                                       {item.claim}
                                                     </p>
-                                                    <div className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-1 rounded shrink-0">
-                                                      {item.commit.slice(0, 7)}
-                                                    </div>
+                                                    {commitBadge && (
+                                                      <div className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-1 rounded shrink-0">
+                                                        {commitBadge}
+                                                      </div>
+                                                    )}
                                                   </div>
                                                   
                                                   <div className="relative group">
@@ -378,7 +385,8 @@ export const Showcase = () => {
                                                     ))}
                                                   </div>
                                                 </div>
-                                              ))
+                                              );
+                                              })
                                             ) : (
                                               <div className="py-4 text-center">
                                                 <p className="text-xs text-zinc-600 italic">No specific code proof has been mapped for this subsection yet.</p>
