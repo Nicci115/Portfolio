@@ -11,11 +11,10 @@ export const Navbar = () => {
   });
 
   const navLinks = [
-    { name: 'Systems Portfolio', href: '#systems-portfolio' },
-    { name: 'Verification', href: '#verification' },
+    { name: 'Selected Work', href: '#systems-portfolio' },
     { name: 'Systems Mindset', href: '#systems-mindset' },
     { name: 'Skills', href: '#skills' },
-    { name: 'Proof', href: '#credibility' },
+    { name: 'Credibility', href: '#credibility' },
   ];
 
   return (
