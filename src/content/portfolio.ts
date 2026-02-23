@@ -81,6 +81,11 @@ export interface PortfolioData {
   featuredProjects: FeaturedProject[];
   systemsMindset: string[];
   skills: Skills;
+  proofOfWork: {
+    positioning: string;
+    buildScope: string[];
+    antiScope: string[];
+  };
   timeline: TimelineItem[];
   bio: {
     technical: string;
@@ -299,42 +304,79 @@ export const portfolio: PortfolioData = {
   ],
   skills: {
     frontend: ['React', 'TypeScript', 'Tailwind CSS', 'Vite'],
-    backend: ['Node.js', 'Express', 'Supabase', 'PostgreSQL'],
-    automation: ['Puppeteer', 'Chrome Extensions (MV3)', 'WebSockets', 'Job Queues'],
+    backend: ['Node.js', 'Express', 'Supabase', 'PostgreSQL', 'Redis', 'Python', 'Rust'],
+    automation: [
+      'Chrome Extensions (MV3)',
+      'WebSockets',
+      'Job Queues',
+      'n8n',
+      'Twilio',
+      'Resend',
+      'Google APIs',
+      'Puppeteer',
+      'Solidity tooling',
+      'On-chain bot scripting',
+    ],
     ai: [
       'OpenAI API',
       'Gemini CLI',
       'Local LLMs (Qwen, Ollama)',
       'Multi-agent Orchestration',
+      'ROCm stack',
+      'Dockerized model orchestration',
+    ],
+  },
+  proofOfWork: {
+    positioning:
+      'I build control-plane and execution-plane systems for real business workflows, browser automation, and GPU-heavy experimentation.',
+    buildScope: [
+      'Owns end-to-end delivery: architecture, implementation, deployment, and operational debugging.',
+      'Designs around failure states first: retries, locks, idempotency, and state reconciliation.',
+      'Builds multi-service systems with clear boundaries between UI orchestration and execution agents.',
+      'Ships private production systems, not demo-only repos.',
+      'Works across app layer and infrastructure layer, including Dockerized AI environments.',
+    ],
+    antiScope: [
+      'I do not build tutorial clones or portfolio-only toy apps.',
+      'I do not optimize for UI polish while ignoring systems reliability and operational constraints.',
     ],
   },
   bio: {
     technical:
-      "Specializing in real-time systems, browser automation, and secure orchestration. I build architectures where Chrome Extensions act as execution agents managed by a central control plane, solving complex synchronization challenges like 'Mirror Mode' job locking.",
+      'Background in automation and systems programming across Rust, Python, Solidity, and Node-based distributed services. Current work centers on orchestrated SaaS platforms, browser execution agents, and GPU-first AI infrastructure.',
     founder:
-      "I don't just write code; I ship products. From self-taught beginnings to deploying production SaaS on Vercel and Render, I focus on systems that replace manual labor with reliable code.",
+      'Since launching client-focused systems work in 2024, I have prioritized software that reduces manual operations and survives real production constraints.',
   },
   timeline: [
     {
+      year: '2022',
+      title: 'Self-taught foundations: on-chain bots and RTP game experiments',
+      description:
+        'Began building in Rust, Python, and Solidity through trading bot workflows and casino game logic centered on RTP mechanics.',
+    },
+    {
       year: '2023',
-      title: 'Self-taught coding + First Automation Systems',
-      description: 'Started building custom scripts to automate business workflows.',
+      title: 'Shift to structured crypto tooling and blockchain game workflows',
+      description:
+        'Built more serious small-scope systems for blockchain game operations and automation-driven execution.',
     },
     {
       year: '2024',
-      title: 'Built Resell Tool Foundation + Supabase Backend',
-      description: 'Architected the multi-tenant database and core listing logic.',
+      title: 'Started business buildout and moved into multi-service product systems',
+      description:
+        'Transitioned from isolated experiments to production architecture work, establishing foundations for the Resell Tool and Real Estate CRM.',
     },
     {
       year: '2025',
-      title: 'Deployed "Mirror Mode"',
+      title: 'Operationalized distributed automation patterns',
       description:
-        'Launched the Chrome Extension + WebSocket orchestration layer for live marketplace sync.',
+        'Implemented control-plane and execution-plane boundaries, WebSocket coordination, and automation reliability practices across active systems.',
     },
     {
       year: '2026',
-      title: 'Portfolio Launch + Next Gen AI Products',
-      description: 'Expanding into voice agents and local LLM orchestration.',
+      title: 'Current focus: systems builder across SaaS, automation, and GPU labs',
+      description:
+        'Actively iterating on private architecture systems and ROCm-based AI orchestration environments with deployment-grade discipline.',
     },
   ],
 };
