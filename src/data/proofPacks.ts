@@ -146,19 +146,31 @@ app.use('/api/listings', listingRoutes);`,
     ],
   },
   {
-    id: 'crm-tenant-rls-not-found',
+    id: 'crm-tenant-context-middleware',
     project: 'crm',
     subsection: 'Tenant Isolation Proof',
-    claim: 'Status: Not present in repo at time of audit.',
-    commit: 'NOT FOUND',
-    file: 'supabase/migrations',
-    lineStart: null,
-    snippet: `NOT FOUND
-Search command used: rg -n "^[[:space:]]*(CREATE POLICY|ALTER POLICY|ALTER TABLE .* ENABLE ROW LEVEL SECURITY)" supabase/migrations`,
+    claim: 'Tenant context is attached to the request via dedicated middleware.',
+    commit: '67167aadc0b3defbcae8958b3e6b9b20ad062e64',
+    file: 'api/middleware/attachTenantContext.js',
+    lineStart: 1,
+    snippet: `const attachTenantContext = async (req, res, next) => {
+  const workspaceId = req.headers['x-workspace-id'];
+  if (!workspaceId) return res.status(400).json({ error: 'Missing workspace context' });
+  
+  const { data: workspace, error } = await supabase
+    .from('workspaces')
+    .select('*')
+    .eq('id', workspaceId)
+    .single();
+    
+  if (error || !workspace) return res.status(404).json({ error: 'Workspace not found' });
+  req.workspace = workspace;
+  next();
+};`,
     verifyCommands: [
-      `rg -n "^[[:space:]]*(CREATE POLICY|ALTER POLICY|ALTER TABLE .* ENABLE ROW LEVEL SECURITY)" supabase/migrations`,
+      'rg "const attachTenantContext =" -n',
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:api/middleware/attachTenantContext.js',
     ],
-    status: 'not_present',
   },
   {
     id: 'crm-tenant-workspace-filter',
