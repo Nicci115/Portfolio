@@ -1475,7 +1475,14 @@ const subsectionRemap: Record<ProofProject, Record<string, string>> = {
   },
 };
 
+const proofSubsectionOverrides: Record<string, string> = {
+  'resell-observability-correlated-events': 'Operational Traceability',
+};
+
 export const proofItems: ProofItem[] = rawProofItems.map((item) => ({
   ...item,
-  subsection: subsectionRemap[item.project][item.subsection] ?? item.subsection,
+  subsection:
+    proofSubsectionOverrides[item.id] ??
+    subsectionRemap[item.project][item.subsection] ??
+    item.subsection,
 }));
