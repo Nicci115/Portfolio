@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Hero } from '@/features/hero/Hero';
 import { Showcase } from '@/features/showcase/Showcase';
+import { SystemsMindset } from '@/features/mindset/SystemsMindset';
 import { Skills } from '@/features/skills/Skills';
 import { Credibility } from '@/features/credibility/Credibility';
 import { Contact } from '@/features/contact/Contact';
@@ -11,6 +12,7 @@ function App() {
     <Layout>
       <Hero />
       <Showcase />
+      <SystemsMindset />
       <Skills />
       <Credibility />
       <Contact />

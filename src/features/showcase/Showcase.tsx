@@ -1,119 +1,253 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { portfolio } from '@/content/portfolio';
 import { Section } from '@/components/ui/Section';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { motion } from 'framer-motion';
 import { fadeInUp } from '@/utils/motion';
-import { Server, Monitor, ArrowRightLeft, Layers } from 'lucide-react';
+import { ChevronDown, Layers, Workflow } from 'lucide-react';
 
 export const Showcase = () => {
-  const { resellTool } = portfolio;
+  const { featuredProjects } = portfolio;
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
+
+  const renderArchitecturePreview = (projectName: string, services: string[]) => {
+    if (projectName.includes('Resell Tool')) {
+      return (
+        <div className="space-y-3">
+          <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2 text-xs text-blue-100">
+            Control Plane
+          </div>
+          <div className="flex items-center justify-center text-[10px] font-mono uppercase tracking-wider text-accent">
+            <span>Mirror Mode</span>
+          </div>
+          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-100">
+            Execution Plane
+          </div>
+        </div>
+      );
+    }
+
+    if (projectName.includes('Real Estate CRM')) {
+      return (
+        <div className="grid grid-cols-2 gap-2">
+          {services.slice(0, 6).map((service) => (
+            <div
+              key={service}
+              className="rounded-md border border-zinc-800 bg-zinc-950/70 px-2 py-2 text-[11px] text-zinc-300"
+            >
+              {service}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-2">
+        {services.slice(0, 5).map((service) => (
+          <div
+            key={service}
+            className="rounded-md border border-zinc-800 bg-zinc-950/70 px-3 py-2 text-[11px] text-zinc-300"
+          >
+            {service}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
-    <Section id="showcase">
+    <Section id="systems-portfolio">
       <div className="space-y-12">
         <motion.div variants={fadeInUp} className="space-y-4 max-w-2xl">
-          <h2 className="text-3xl font-bold text-zinc-100">Featured Project</h2>
-          <div className="flex items-center gap-3">
-            <div className="h-px bg-zinc-800 flex-grow" />
-            <span className="text-accent font-mono text-sm uppercase tracking-widest">
-              {resellTool.status}
-            </span>
-          </div>
+          <h2 className="text-3xl font-bold text-zinc-100">Systems Portfolio</h2>
+          <p className="text-zinc-500">
+            Distributed systems, automation boundaries, and infrastructure experiments built for
+            production reality.
+          </p>
         </motion.div>
 
-        <Card className="bg-zinc-900/50 backdrop-blur-sm border-zinc-800/80">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Left: Content */}
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-zinc-100">{resellTool.name}</h3>
-                <p className="text-lg text-zinc-400 leading-relaxed">
-                  {resellTool.oneLiner}
-                </p>
-              </div>
+        <div className="space-y-6">
+          {featuredProjects.map((project, index) => {
+            const isExpanded = expandedIndex === index;
+            const panelId = `project-deep-dive-${index}`;
+            const allTech = project.techStack
+              ? Object.values(project.techStack).flat().slice(0, 10)
+              : [];
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-zinc-100 font-medium">
-                  <Layers className="w-5 h-5 text-accent" />
-                  <span>Key Highlights</span>
+            return (
+              <Card
+                key={project.name}
+                className="bg-zinc-900/50 backdrop-blur-sm border-zinc-800/80 overflow-hidden"
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                  <div className="space-y-5 lg:col-span-3">
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h3 className="text-2xl font-bold text-zinc-100">{project.name}</h3>
+                        {project.status && (
+                          <span className="text-[11px] font-mono uppercase tracking-widest text-accent border border-accent/30 bg-accent/10 rounded-full px-3 py-1">
+                            {project.status}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-zinc-400 leading-relaxed">{project.oneLiner}</p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-zinc-200 font-medium">
+                        <Layers className="w-4 h-4 text-accent" />
+                        <span>Tech Stack</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {allTech.map((tech) => (
+                          <Badge key={`${project.name}-${tech}`} className="bg-zinc-950/60">
+                            {tech}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-2 space-y-4">
+                    <div className="text-xs font-mono uppercase tracking-widest text-zinc-500">
+                      Architecture Preview
+                    </div>
+                    <div className="rounded-xl border border-zinc-800 bg-zinc-950/70 p-4">
+                      {renderArchitecturePreview(project.name, project.architecture?.serviceBreakdown ?? [])}
+                    </div>
+                  </div>
                 </div>
-                <ul className="space-y-3">
-                  {resellTool.highlights.map((highlight, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-sm text-zinc-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
-                      {highlight}
-                    </li>
-                  ))}
-                </ul>
-              </div>
 
-              <div className="flex flex-wrap gap-2">
-                {Object.values(resellTool.techStack).map((tech) => (
-                  <Badge key={tech} className="bg-zinc-950/50">
-                    {tech.split(',')[0]}
-                  </Badge>
-                ))}
-              </div>
-            </div>
+                <div className="mt-7 border-t border-zinc-800/80 pt-5">
+                  <button
+                    type="button"
+                    aria-expanded={isExpanded}
+                    aria-controls={panelId}
+                    onClick={() => setExpandedIndex(isExpanded ? null : index)}
+                    className="inline-flex items-center gap-2 text-sm font-medium text-zinc-200 hover:text-accent transition-colors"
+                  >
+                    <Workflow className="w-4 h-4" />
+                    Deep Dive
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                    />
+                  </button>
 
-            {/* Right: Architecture Diagram */}
-            <div className="bg-zinc-950 rounded-xl p-6 border border-zinc-800/50 flex flex-col justify-center space-y-8">
-               <div className="text-xs font-mono text-zinc-500 uppercase tracking-widest mb-4 border-b border-zinc-800 pb-2">
-                  System Architecture
-               </div>
-               
-               {/* Diagram Visual */}
-               <div className="relative flex flex-col gap-6">
-                  
-                  {/* Control Plane */}
-                  <div className="p-4 rounded-lg border border-blue-500/20 bg-blue-500/5 relative group">
-                    <div className="absolute -left-1 top-4 w-1 h-8 bg-blue-500 rounded-r-full" />
-                    <div className="flex items-center gap-3 mb-2">
-                      <Server className="w-4 h-4 text-blue-400" />
-                      <span className="text-sm font-bold text-blue-100">Control Plane</span>
+                  {isExpanded && (
+                    <div id={panelId} className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="space-y-5">
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-mono uppercase tracking-wider text-accent">
+                            1) Problem
+                          </h4>
+                          <p className="text-sm text-zinc-400">{project.problem}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-mono uppercase tracking-wider text-accent">
+                            2) Outcome
+                          </h4>
+                          <p className="text-sm text-zinc-400">{project.outcome}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-mono uppercase tracking-wider text-accent">
+                            3) Architecture
+                          </h4>
+                          <div className="space-y-3">
+                            <div>
+                              <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2">
+                                Service Breakdown
+                              </p>
+                              <ul className="space-y-1.5">
+                                {(project.architecture?.serviceBreakdown ?? []).map((service) => (
+                                  <li key={service} className="text-sm text-zinc-400 flex items-start gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
+                                    {service}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div>
+                              <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2">
+                                Data Flow
+                              </p>
+                              <ol className="space-y-1.5">
+                                {(project.architecture?.dataFlowSteps ?? []).map((step, stepIndex) => (
+                                  <li key={step} className="text-sm text-zinc-400 flex items-start gap-2">
+                                    <span className="text-accent font-mono text-xs mt-[2px]">
+                                      {stepIndex + 1}.
+                                    </span>
+                                    {step}
+                                  </li>
+                                ))}
+                              </ol>
+                            </div>
+                            <div>
+                              <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2">
+                                Boundaries
+                              </p>
+                              <ul className="space-y-1.5">
+                                {(project.architecture?.boundaries ?? []).map((boundary) => (
+                                  <li key={boundary} className="text-sm text-zinc-400 flex items-start gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
+                                    {boundary}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-5">
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-mono uppercase tracking-wider text-accent">
+                            4) Engineering Challenges
+                          </h4>
+                          <ul className="space-y-1.5">
+                            {(project.engineeringChallenges ?? []).map((item) => (
+                              <li key={item} className="text-sm text-zinc-400 flex items-start gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-mono uppercase tracking-wider text-accent">
+                            5) Scaling Considerations
+                          </h4>
+                          <ul className="space-y-1.5">
+                            {(project.scalingConsiderations ?? []).map((item) => (
+                              <li key={item} className="text-sm text-zinc-400 flex items-start gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-mono uppercase tracking-wider text-accent">
+                            6) What I&apos;d Refactor Next
+                          </h4>
+                          <ul className="space-y-1.5">
+                            {(project.refactorNext ?? []).map((item) => (
+                              <li key={item} className="text-sm text-zinc-400 flex items-start gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-xs text-blue-200/60 font-mono">
-                      {resellTool.architecture.controlPlane}
-                    </div>
-                  </div>
-
-                  {/* Connection Line */}
-                  <div className="flex items-center justify-center gap-2 text-zinc-600">
-                    <div className="h-8 w-px bg-zinc-800" />
-                    <ArrowRightLeft className="w-4 h-4 animate-pulse text-accent" />
-                    <span className="text-[10px] uppercase tracking-wider font-mono text-accent">
-                      Mirror Mode (WS)
-                    </span>
-                    <div className="h-8 w-px bg-zinc-800" />
-                  </div>
-
-                  {/* Execution Plane */}
-                  <div className="p-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5 relative">
-                    <div className="absolute -left-1 top-4 w-1 h-8 bg-emerald-500 rounded-r-full" />
-                    <div className="flex items-center gap-3 mb-2">
-                      <Monitor className="w-4 h-4 text-emerald-400" />
-                      <span className="text-sm font-bold text-emerald-100">Execution Plane</span>
-                    </div>
-                     <div className="text-xs text-emerald-200/60 font-mono">
-                      {resellTool.architecture.executionPlane}
-                    </div>
-                  </div>
-
-               </div>
-
-               <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-zinc-800">
-                  {resellTool.metrics.map((metric, i) => (
-                    <div key={i} className="text-center">
-                       <div className="text-[10px] text-zinc-500 uppercase">{metric.label}</div>
-                       <div className="text-xs font-bold text-zinc-300 mt-1 font-mono">{metric.value}</div>
-                    </div>
-                  ))}
-               </div>
-            </div>
-          </div>
-        </Card>
+                  )}
+                </div>
+              </Card>
+            );
+          })}
+        </div>
       </div>
     </Section>
   );

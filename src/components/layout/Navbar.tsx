@@ -11,7 +11,8 @@ export const Navbar = () => {
   });
 
   const navLinks = [
-    { name: 'Showcase', href: '#showcase' },
+    { name: 'Systems Portfolio', href: '#systems-portfolio' },
+    { name: 'Systems Mindset', href: '#systems-mindset' },
     { name: 'Skills', href: '#skills' },
     { name: 'Proof', href: '#credibility' },
   ];

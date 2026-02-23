@@ -2,7 +2,7 @@ import React from 'react';
 import { portfolio } from '@/content/portfolio';
 import { Section } from '@/components/ui/Section';
 import { Card } from '@/components/ui/Card';
-import { Mail, Phone, Linkedin, Facebook } from 'lucide-react';
+import { Mail, Linkedin, Facebook } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { fadeInUp } from '@/utils/motion';
 
@@ -16,13 +16,6 @@ export const Contact = () => {
       href: links.email,
       icon: Mail,
       primary: true
-    },
-    {
-      label: 'Phone',
-      value: links.phone.replace('tel:', ''),
-      href: links.phone,
-      icon: Phone,
-      primary: false
     },
     {
       label: 'LinkedIn',
