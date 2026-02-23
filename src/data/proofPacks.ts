@@ -27,38 +27,36 @@ export const projectProofPacks: Record<
   crm: {
     title: 'Real Estate CRM',
     subsections: [
-      'Architecture Proof',
-      'AI / LLM Engineering Proof',
-      'Security / Auth Proof',
-      'Tenant Isolation Proof',
-      'Reliability Proof (Retries / Idempotency / Dedupe)',
-      'Database Integrity & Audit Proof',
-      'Performance Proof (Indexes / Query path)',
+      'System Contract',
+      'Execution Path',
+      'State Integrity',
+      'Failure Behavior',
+      'Operational Traceability',
     ],
   },
   resell: {
     title: 'Resell Tool',
     subsections: [
-      'Architecture Proof',
-      'Security / Auth Proof',
-      'Realtime / Coordination Proof',
-      'Distributed Locking & State Proof',
-      'Reliability Proof (Retries / Idempotency / Dedupe)',
+      'System Contract',
+      'Execution Path',
+      'State Integrity',
+      'Failure Behavior',
+      'Operational Traceability',
     ],
   },
   ai: {
     title: 'Fashion Video Pipeline',
     subsections: [
-      'Pipeline Contract & Runtime Surface',
-      'Deterministic Orchestration & Artifact Lineage',
-      'GPU Runtime & Environment Boundary',
-      'Failure Controls & Recovery Paths',
-      'Traceability, Observability & Safety',
+      'System Contract',
+      'Execution Path',
+      'State Integrity',
+      'Failure Behavior',
+      'Operational Traceability',
     ],
   },
 };
 
-export const proofItems: ProofItem[] = [
+const rawProofItems: ProofItem[] = [
   {
     id: 'crm-arch-route',
     project: 'crm',
@@ -1450,3 +1448,34 @@ out_path = out_dir / f"render_{args.scene}_run_{run_id}.mp4"`,
     ],
   },
 ];
+
+const subsectionRemap: Record<ProofProject, Record<string, string>> = {
+  crm: {
+    'Architecture Proof': 'System Contract',
+    'AI / LLM Engineering Proof': 'Execution Path',
+    'Security / Auth Proof': 'State Integrity',
+    'Tenant Isolation Proof': 'State Integrity',
+    'Reliability Proof (Retries / Idempotency / Dedupe)': 'Failure Behavior',
+    'Database Integrity & Audit Proof': 'Operational Traceability',
+    'Performance Proof (Indexes / Query path)': 'Execution Path',
+  },
+  resell: {
+    'Architecture Proof': 'System Contract',
+    'Security / Auth Proof': 'State Integrity',
+    'Realtime / Coordination Proof': 'Execution Path',
+    'Distributed Locking & State Proof': 'State Integrity',
+    'Reliability Proof (Retries / Idempotency / Dedupe)': 'Failure Behavior',
+  },
+  ai: {
+    'Pipeline Contract & Runtime Surface': 'System Contract',
+    'Deterministic Orchestration & Artifact Lineage': 'Execution Path',
+    'GPU Runtime & Environment Boundary': 'State Integrity',
+    'Failure Controls & Recovery Paths': 'Failure Behavior',
+    'Traceability, Observability & Safety': 'Operational Traceability',
+  },
+};
+
+export const proofItems: ProofItem[] = rawProofItems.map((item) => ({
+  ...item,
+  subsection: subsectionRemap[item.project][item.subsection] ?? item.subsection,
+}));
