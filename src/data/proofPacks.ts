@@ -28,9 +28,11 @@ export const projectProofPacks: Record<
     title: 'Real Estate CRM',
     subsections: [
       'Architecture Proof',
+      'AI / LLM Engineering Proof',
       'Security / Auth Proof',
       'Tenant Isolation Proof',
       'Reliability Proof (Retries / Idempotency / Dedupe)',
+      'Database Integrity & Audit Proof',
       'Performance Proof (Indexes / Query path)',
     ],
   },
@@ -40,6 +42,7 @@ export const projectProofPacks: Record<
       'Architecture Proof',
       'Security / Auth Proof',
       'Realtime / Coordination Proof',
+      'Distributed Locking & State Proof',
       'Reliability Proof (Retries / Idempotency / Dedupe)',
     ],
   },
@@ -522,7 +525,104 @@ if (importRun.completed_at || importRun.status === 'completed') {
 }`,
     verifyCommands: [
       'rg "completedScanIds.has\\(payload.scanId\\)|idempotent: true" -n',
-      'git show 88afbafd4b316197a0f0f1b6c85cf43dbe7527f8:crosslister-backend/controllers/mirrorEventsController.js',
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:crosslister-backend/controllers/mirrorEventsController.js',
+    ],
+  },
+  {
+    id: 'crm-ai-prompt-engineering',
+    project: 'crm',
+    subsection: 'AI / LLM Engineering Proof',
+    claim: 'Unstructured voice transcripts are parsed into strict JSON schemas via engineered system prompts.',
+    commit: '67167aadc0b3defbcae8958b3e6b9b20ad062e64',
+    file: 'backend/generate_profile_from_call_transcript.json',
+    lineStart: 108,
+    snippet: `"parameters": {
+  "model": "gemini-pro",
+  "prompt": "You are a meticulous data analyst. Analyze this complete call transcript... Your task is twofold: 1. Write a rich, narrative summary... 2. Extract the following data points precisely: income, credit_score, down_payment... Return a single, valid JSON object with these keys.",
+  "options": {
+    "retryOnFail": true,
+    "retryInterval": 5000,
+    "retryAttempts": 1
+  }
+}`,
+    verifyCommands: [
+      'rg "You are a meticulous data analyst" -n backend/generate_profile_from_call_transcript.json',
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:backend/generate_profile_from_call_transcript.json',
+    ],
+  },
+  {
+    id: 'crm-db-audit-trigger',
+    project: 'crm',
+    subsection: 'Database Integrity & Audit Proof',
+    claim: 'Critical entity creation is immutably logged via database-level triggers to ensure audit trails.',
+    commit: '67167aadc0b3defbcae8958b3e6b9b20ad062e64',
+    file: 'supabase/migrations/20250727000000_create_lead_creation_trigger.sql',
+    lineStart: 1,
+    snippet: `CREATE OR REPLACE FUNCTION public.log_lead_creation()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.activity_log (user_id, workspace_id, activity_type, activity_data)
+  VALUES (NEW.agent_id, NEW.workspace_id, 'lead_created', 
+  jsonb_build_object('lead_id', NEW.id, 'lead_name', NEW.name));
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER log_lead_creation_trigger
+AFTER INSERT ON public.leads
+FOR EACH ROW
+EXECUTE FUNCTION public.log_lead_creation();`,
+    verifyCommands: [
+      'rg "CREATE TRIGGER log_lead_creation_trigger" -n supabase/migrations/20250727000000_create_lead_creation_trigger.sql',
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:supabase/migrations/20250727000000_create_lead_creation_trigger.sql',
+    ],
+  },
+  {
+    id: 'resell-concurrency-mutex',
+    project: 'resell',
+    subsection: 'Distributed Locking & State Proof',
+    claim: 'Browser execution uses mutex locks to prevent race conditions during parallel automation jobs.',
+    commit: '3d990b86f4a65d9061819ce558da0878fa0ed4d7',
+    file: 'extension/src/background/index.js',
+    lineStart: 440,
+    snippet: `if (message.type === 'EXTENSION_ACQUIRE_LOCK') {
+  const { id, ttl } = message.payload;
+  acquireLock(id, ttl);
+  sendResponse({ success: true, count: getLockCount() });
+  return;
+}
+
+if (message.type === 'EXTENSION_RELEASE_LOCK') {
+  const { id } = message.payload;
+  releaseLock(id);
+  sendResponse({ success: true, count: getLockCount() });
+  return;
+}`,
+    verifyCommands: [
+      'rg "EXTENSION_ACQUIRE_LOCK" -n extension/src/background/index.js',
+      'git show 3d990b86f4a65d9061819ce558da0878fa0ed4d7:extension/src/background/index.js',
+    ],
+  },
+  {
+    id: 'resell-security-encryption',
+    project: 'resell',
+    subsection: 'Security / Auth Proof',
+    claim: 'Sensitive session tokens are encrypted at rest using buffer-based AES wrapping before storage.',
+    commit: '180e49afb546d83be104b0c0688de60ba46fc4fa',
+    file: 'crosslister-backend/services/mirrorTokenService.js',
+    lineStart: 50,
+    snippet: `const payload = {
+  session_id: sessionId,
+  user_id: userId,
+  browser_id: browserId,
+  access_token_encrypted: Buffer.from(encryptJson({ accessToken }), 'base64'),
+  refresh_token_encrypted: Buffer.from(encryptJson({ refreshToken, accountId }), 'base64'),
+  access_token_expires: new Date(Date.now() + ACCESS_EXPIRES_IN * 1000).toISOString(),
+  revoked: false,
+};`,
+    verifyCommands: [
+      'rg "Buffer.from\\(encryptJson" -n crosslister-backend/services/mirrorTokenService.js',
+      'git show 180e49afb546d83be104b0c0688de60ba46fc4fa:crosslister-backend/services/mirrorTokenService.js',
     ],
   },
 ];
