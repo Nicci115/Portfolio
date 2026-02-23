@@ -625,4 +625,387 @@ if (message.type === 'EXTENSION_RELEASE_LOCK') {
       'git show 180e49afb546d83be104b0c0688de60ba46fc4fa:crosslister-backend/services/mirrorTokenService.js',
     ],
   },
+  {
+    id: 'crm-route-write-update',
+    project: 'crm',
+    subsection: 'Architecture Proof',
+    claim: 'Lead update enters through an explicit PUT route handler.',
+    commit: '67167aadc0b3defbcae8958b3e6b9b20ad062e64',
+    file: 'api/routes/leadRoutes.js',
+    lineStart: 14,
+    snippet: `// PUT /api/leads/:id
+router.put('/:id', leadService.updateLead);`,
+    verifyCommands: [
+      `rg "router.put\\('/:id', leadService.updateLead\\)" -n api/routes/leadRoutes.js`,
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:api/routes/leadRoutes.js',
+    ],
+  },
+  {
+    id: 'crm-service-write-zod-validation',
+    project: 'crm',
+    subsection: 'Architecture Proof',
+    claim: 'Update flow validates lead mutation payload with Zod before adapter write.',
+    commit: '67167aadc0b3defbcae8958b3e6b9b20ad062e64',
+    file: 'api/services/leadService.js',
+    lineStart: 1639,
+    snippet: `// Validate input using Zod schema
+const validatedUpdates = updateLeadSchema.parse(updates);
+
+const crmAdapter = await crmAdapterFactory.getAdapter(workspaceId);
+const updatedLead = await crmAdapter.updateLead(id, validatedUpdates);`,
+    verifyCommands: [
+      'rg "updateLeadSchema\\.parse\\(updates\\)|crmAdapter\\.updateLead\\(id, validatedUpdates\\)" -n api/services/leadService.js',
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:api/services/leadService.js',
+    ],
+  },
+  {
+    id: 'crm-adapter-update-mutation',
+    project: 'crm',
+    subsection: 'Architecture Proof',
+    claim: 'Supabase adapter write path mutates leads via update-by-id query.',
+    commit: '67167aadc0b3defbcae8958b3e6b9b20ad062e64',
+    file: 'api/adapters/SupabaseAdapter.js',
+    lineStart: 18,
+    snippet: `async updateLead(id, updates) {
+  const { data, error } = await supabase
+    .from('leads')
+    .update(updates)
+    .eq('id', id)
+    .select();
+  if (error) throw error;
+  return data[0];
+}`,
+    verifyCommands: [
+      `rg "async updateLead\\(id, updates\\)|from\\('leads'\\)\\.update\\(updates\\)\\.eq\\('id', id\\)" -n api/adapters/SupabaseAdapter.js`,
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:api/adapters/SupabaseAdapter.js',
+    ],
+  },
+  {
+    id: 'crm-idempotency-calendly-upsert',
+    project: 'crm',
+    subsection: 'Reliability Proof (Retries / Idempotency / Dedupe)',
+    claim: 'Calendly ingestion is deduped with upsert conflict key on calendly_event_uri.',
+    commit: '67167aadc0b3defbcae8958b3e6b9b20ad062e64',
+    file: 'api/services/calendlyWebhookService.js',
+    lineStart: 1,
+    snippet: `await supabase
+  .from('calendly_events')
+  .upsert({
+    calendly_event_uri: eventUri,
+    workspace_id: workspaceId,
+    raw_payload: payload,
+  }, { onConflict: 'calendly_event_uri' });`,
+    verifyCommands: [
+      `rg "calendly_event_uri|onConflict: 'calendly_event_uri'|from\\('calendly_events'\\)\\.upsert" -n api`,
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:api/services/calendlyWebhookService.js',
+    ],
+  },
+  {
+    id: 'crm-reliability-worker-fetch-due',
+    project: 'crm',
+    subsection: 'Reliability Proof (Retries / Idempotency / Dedupe)',
+    claim: 'Worker loop reads due pending jobs from scheduled_jobs for execution.',
+    commit: '67167aadc0b3defbcae8958b3e6b9b20ad062e64',
+    file: 'backend/workflow_archive/scheduled_jobs_worker.json',
+    lineStart: 1,
+    snippet: `"table": "scheduled_jobs",
+"filters": {
+  "status": "pending",
+  "scheduled_for_lte_now": true
+}`,
+    verifyCommands: [
+      'rg "scheduled_jobs|status.*pending|scheduled_for" -n backend',
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:backend/workflow_archive/scheduled_jobs_worker.json',
+    ],
+  },
+  {
+    id: 'crm-reliability-worker-complete-status',
+    project: 'crm',
+    subsection: 'Reliability Proof (Retries / Idempotency / Dedupe)',
+    claim: 'Worker completion path marks processed scheduled jobs as completed.',
+    commit: '67167aadc0b3defbcae8958b3e6b9b20ad062e64',
+    file: 'backend/workflow_archive/scheduled_jobs_worker.json',
+    lineStart: 1,
+    snippet: `n8n.supabase
+  .from('scheduled_jobs')
+  .update({ status: 'completed', processed_at: new Date().toISOString() })
+  .eq('id', jobId);`,
+    verifyCommands: [
+      `rg "from\\('scheduled_jobs'\\)\\.update\\(|status: 'completed'|processed_at" -n backend`,
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:backend/workflow_archive/scheduled_jobs_worker.json',
+    ],
+  },
+  {
+    id: 'crm-observability-workflow-start',
+    project: 'crm',
+    subsection: 'Database Integrity & Audit Proof',
+    claim: 'Workflow start event persists correlated identifiers into workflow_logs.',
+    commit: '67167aadc0b3defbcae8958b3e6b9b20ad062e64',
+    file: 'backend/workflow_archive/utility_log_workflow_start.json',
+    lineStart: 7,
+    snippet: `const logEntry = {
+  workflow_name: workflowName,
+  execution_id: executionId,
+  workspace_id: workspaceId,
+};
+if (leadId) logEntry.lead_id = leadId;
+if (agentId) logEntry.agent_id = agentId;
+if (userId) logEntry.user_id = userId;
+n8n.supabase.from('workflow_logs').insert([logEntry]).select();`,
+    verifyCommands: [
+      `rg "workflow_logs|execution_id|lead_id|agent_id|user_id" -n backend/workflow_archive/utility_log_workflow_start.json`,
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:backend/workflow_archive/utility_log_workflow_start.json',
+    ],
+  },
+  {
+    id: 'crm-observability-workflow-end',
+    project: 'crm',
+    subsection: 'Database Integrity & Audit Proof',
+    claim: 'Workflow end event updates the same workflow log with duration and terminal metadata.',
+    commit: '67167aadc0b3defbcae8958b3e6b9b20ad062e64',
+    file: 'backend/workflow_archive/utility_log_workflow_end.json',
+    lineStart: 7,
+    snippet: `const logEntry = { status: finalStatus };
+logEntry.duration_ms = end.getTime() - start.getTime();
+n8n.supabase
+  .from('workflow_logs')
+  .update(logEntry)
+  .eq('id', workflowLogId);`,
+    verifyCommands: [
+      `rg "workflowLogId|duration_ms|from\\('workflow_logs'\\)\\.update" -n backend/workflow_archive/utility_log_workflow_end.json`,
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:backend/workflow_archive/utility_log_workflow_end.json',
+    ],
+  },
+  {
+    id: 'crm-security-zod-update-schema',
+    project: 'crm',
+    subsection: 'Security / Auth Proof',
+    claim: 'Lead update endpoint enforces schema validation before persistence.',
+    commit: '67167aadc0b3defbcae8958b3e6b9b20ad062e64',
+    file: 'api/services/leadService.js',
+    lineStart: 1639,
+    snippet: `if (!workspaceId) {
+  return res.status(400).json({ error: 'workspaceId is required' });
+}
+const validatedUpdates = updateLeadSchema.parse(updates);
+const updatedLead = await crmAdapter.updateLead(id, validatedUpdates);`,
+    verifyCommands: [
+      'rg "workspaceId is required|updateLeadSchema\\.parse\\(updates\\)" -n api/services/leadService.js',
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:api/services/leadService.js',
+    ],
+  },
+  {
+    id: 'crm-performance-partial-index-crm-conn',
+    project: 'crm',
+    subsection: 'Performance Proof (Indexes / Query path)',
+    claim: 'Partial unique index constrains active CRM connection lookup per workspace.',
+    commit: '67167aadc0b3defbcae8958b3e6b9b20ad062e64',
+    file: 'supabase/migrations/20250731120002_create_crm_connections.sql',
+    lineStart: 1,
+    snippet: `CREATE UNIQUE INDEX crm_connections_workspace_id_is_active_idx
+ON public.crm_connections (workspace_id)
+WHERE is_active = true;`,
+    verifyCommands: [
+      'rg "crm_connections_workspace_id_is_active_idx|WHERE is_active = true" -n supabase/migrations',
+      'git show 67167aadc0b3defbcae8958b3e6b9b20ad062e64:supabase/migrations/20250731120002_create_crm_connections.sql',
+    ],
+  },
+  {
+    id: 'resell-message-protocol-inventory',
+    project: 'resell',
+    subsection: 'Architecture Proof',
+    claim: 'Mirror protocol event taxonomy is centrally declared for backend coordination.',
+    commit: '88afbafd4b316197a0f0f1b6c85cf43dbe7527f8',
+    file: 'crosslister-backend/services/mirrorMode/protocol.js',
+    lineStart: 1,
+    snippet: `export const MIRROR_EVENTS = {
+  AUTH: 'mirror:auth',
+  HEARTBEAT: 'mirror:heartbeat',
+  ACK_PREFILL: 'mirror:ack:prefill',
+  CLOSE: 'mirror:close',
+};`,
+    verifyCommands: [
+      'rg "MIRROR_EVENTS|mirror:auth|mirror:heartbeat|mirror:ack:prefill" -n crosslister-backend/services/mirrorMode',
+      'git show 88afbafd4b316197a0f0f1b6c85cf43dbe7527f8:crosslister-backend/services/mirrorMode/protocol.js',
+    ],
+  },
+  {
+    id: 'resell-bridge-forwarding-coverage',
+    project: 'resell',
+    subsection: 'Architecture Proof',
+    claim: 'SPA bridge forwards auth, scan/work-plane, and lock-control messages to runtime.',
+    commit: '88afbafd4b316197a0f0f1b6c85cf43dbe7527f8',
+    file: 'extension/src/contentScripts/spaBridge.ts',
+    lineStart: 17,
+    snippet: `case 'AUTH_BUNDLE':
+  await chrome.runtime.sendMessage({ type: 'AUTH_BUNDLE', payload: event.data.payload });
+  break;
+case 'EXTENSION_ACQUIRE_LOCK':
+case 'EXTENSION_RELEASE_LOCK':
+case 'mirror:scan:complete':
+case 'WORK_PLANE_INIT':
+  chrome.runtime.sendMessage(event.data).catch(() => {});`,
+    verifyCommands: [
+      'rg "AUTH_BUNDLE|EXTENSION_ACQUIRE_LOCK|EXTENSION_RELEASE_LOCK|mirror:scan:complete|WORK_PLANE_INIT" -n extension/src/contentScripts/spaBridge.ts',
+      'git show 88afbafd4b316197a0f0f1b6c85cf43dbe7527f8:extension/src/contentScripts/spaBridge.ts',
+    ],
+  },
+  {
+    id: 'resell-http-mirror-route-surface',
+    project: 'resell',
+    subsection: 'Security / Auth Proof',
+    claim: 'Mirror HTTP routes expose issue/refresh/revoke and guarded event endpoints.',
+    commit: '88afbafd4b316197a0f0f1b6c85cf43dbe7527f8',
+    file: 'crosslister-backend/routes/mirrorRoutes.js',
+    lineStart: 1,
+    snippet: `router.post('/token', verifyAuth, mirrorController.issueToken);
+router.post('/token/refresh', mirrorController.refreshToken);
+router.post('/token/revoke', verifyAuth, mirrorController.revokeToken);
+router.post('/prefill/enqueue', verifyAuth, mirrorEventsController.enqueuePrefill);`,
+    verifyCommands: [
+      `rg "router.post\\('/token|/token/refresh|/token/revoke|/prefill/enqueue" -n crosslister-backend/routes/mirrorRoutes.js`,
+      'git show 88afbafd4b316197a0f0f1b6c85cf43dbe7527f8:crosslister-backend/routes/mirrorRoutes.js',
+    ],
+  },
+  {
+    id: 'resell-auth-middleware-header-verify',
+    project: 'resell',
+    subsection: 'Security / Auth Proof',
+    claim: 'Mirror auth middleware enforces token presence and verified claims before processing.',
+    commit: '88afbafd4b316197a0f0f1b6c85cf43dbe7527f8',
+    file: 'crosslister-backend/middleware/verifyMirrorAuth.js',
+    lineStart: 1,
+    snippet: `const token = req.headers['x-mirror-token'] || '';
+if (!token) return res.status(401).json({ error: 'Missing mirror token' });
+const claims = mirrorTokenService.verifyToken(token);
+req.mirror = claims;
+next();`,
+    verifyCommands: [
+      `rg "x-mirror-token|Missing mirror token|verifyToken\\(token\\)" -n crosslister-backend/middleware`,
+      'git show 88afbafd4b316197a0f0f1b6c85cf43dbe7527f8:crosslister-backend/middleware/verifyMirrorAuth.js',
+    ],
+  },
+  {
+    id: 'resell-ownership-assertion',
+    project: 'resell',
+    subsection: 'Distributed Locking & State Proof',
+    claim: 'Ownership guard requires matching browser/install identifiers for protected transitions.',
+    commit: '88afbafd4b316197a0f0f1b6c85cf43dbe7527f8',
+    file: 'crosslister-backend/services/syncJobTracker.js',
+    lineStart: 1,
+    snippet: `if (!browserId || !installId) {
+  throw new ApiError('Missing ownership identifiers.', 403);
+}
+const row = await supabase.from(TABLE)
+  .select('*')
+  .eq('owner_browser_id', browserId)
+  .eq('owner_install_id', installId)
+  .maybeSingle();`,
+    verifyCommands: [
+      'rg "Missing ownership identifiers|owner_browser_id|owner_install_id|assertOwnership" -n crosslister-backend/services/syncJobTracker.js',
+      'git show 88afbafd4b316197a0f0f1b6c85cf43dbe7527f8:crosslister-backend/services/syncJobTracker.js',
+    ],
+  },
+  {
+    id: 'resell-job-running-heartbeat-write',
+    project: 'resell',
+    subsection: 'Realtime / Coordination Proof',
+    claim: 'Running-state write persists ownership and heartbeat timestamp for live job coordination.',
+    commit: '88afbafd4b316197a0f0f1b6c85cf43dbe7527f8',
+    file: 'crosslister-backend/services/syncJobTracker.js',
+    lineStart: 1,
+    snippet: `const updatePayload = {
+  status: MIRROR_JOB_STATUS.RUNNING,
+  last_heartbeat: new Date().toISOString(),
+  owner_browser_id: ownerBrowserId || null,
+  owner_install_id: ownerInstallId || null,
+  owner_tab_id: ownerTabId || null,
+};`,
+    verifyCommands: [
+      'rg "MIRROR_JOB_STATUS\\.RUNNING|last_heartbeat|owner_browser_id|owner_install_id|owner_tab_id" -n crosslister-backend/services/syncJobTracker.js',
+      'git show 88afbafd4b316197a0f0f1b6c85cf43dbe7527f8:crosslister-backend/services/syncJobTracker.js',
+    ],
+  },
+  {
+    id: 'resell-replay-queue-persistence',
+    project: 'resell',
+    subsection: 'Reliability Proof (Retries / Idempotency / Dedupe)',
+    claim: 'Replay queue persists in chrome.storage.local and dedupes queued job entries.',
+    commit: '88afbafd4b316197a0f0f1b6c85cf43dbe7527f8',
+    file: 'extension/src/background/replayQueue.ts',
+    lineStart: 4,
+    snippet: `const replayQueueKey = 'replay_queue';
+const queue = await getReplayQueue();
+const exists = queue.find((q) => q.jobId === jobId);
+if (exists) return;
+await chrome.storage.local.set({ [replayQueueKey]: next });`,
+    verifyCommands: [
+      'rg "replay_queue|enqueueReplay|const exists = queue.find|chrome.storage.local.set" -n extension/src/background/replayQueue.ts',
+      'git show 88afbafd4b316197a0f0f1b6c85cf43dbe7527f8:extension/src/background/replayQueue.ts',
+    ],
+  },
+  {
+    id: 'resell-replay-request-dispatch',
+    project: 'resell',
+    subsection: 'Reliability Proof (Retries / Idempotency / Dedupe)',
+    claim: 'Reconnect recovery dispatches mirror replay requests with queued job IDs and runtime identity.',
+    commit: '88afbafd4b316197a0f0f1b6c85cf43dbe7527f8',
+    file: 'extension/src/background/connectionManager.ts',
+    lineStart: 1,
+    snippet: `const queue = await getReplayQueue();
+if (!queue.length) return;
+const jobIds = queue.map((q) => q.jobId);
+send({
+  type: 'mirror:replay_request',
+  payload: { jobIds, browserId: BROWSER_ID, installId: INSTALL_ID },
+});`,
+    verifyCommands: [
+      'rg "mirror:replay_request|jobIds|getReplayQueue|installId: INSTALL_ID" -n extension/src/background',
+      'git show 88afbafd4b316197a0f0f1b6c85cf43dbe7527f8:extension/src/background/connectionManager.ts',
+    ],
+  },
+  {
+    id: 'resell-lockmanager-ttl-autorelease',
+    project: 'resell',
+    subsection: 'Distributed Locking & State Proof',
+    claim: 'Lock manager supports TTL refresh, auto-release, and active-lock count telemetry.',
+    commit: '88afbafd4b316197a0f0f1b6c85cf43dbe7527f8',
+    file: 'extension/src/background/lockManager.js',
+    lineStart: 15,
+    snippet: `export function acquireLock(id, ttl = 60000) {
+  if (locks.has(id)) {
+    const lock = locks.get(id);
+    clearTimeout(lock.timeout);
+    lock.timeout = setTimeout(() => handleAutoRelease(id), ttl);
+  } else {
+    const timeout = setTimeout(() => handleAutoRelease(id), ttl);
+    locks.set(id, { timeout, expiresAt: Date.now() + ttl });
+  }
+}
+export function getLockCount() { return locks.size; }`,
+    verifyCommands: [
+      'rg "acquireLock|handleAutoRelease|getLockCount|ttl = 60000" -n extension/src/background/lockManager.js',
+      'git show 88afbafd4b316197a0f0f1b6c85cf43dbe7527f8:extension/src/background/lockManager.js',
+    ],
+  },
+  {
+    id: 'resell-observability-correlated-events',
+    project: 'resell',
+    subsection: 'Realtime / Coordination Proof',
+    claim: 'Runtime events emit correlation fields including jobId/importRunId/runId/installId.',
+    commit: '88afbafd4b316197a0f0f1b6c85cf43dbe7527f8',
+    file: 'extension/src/background/index.js',
+    lineStart: 1,
+    snippet: `logEvent('terminal_sent', {
+  jobId: jobId || importRunId,
+  importRunId,
+  runId: RUN_ID,
+  installId: INSTALL_ID,
+});
+notifyApp(type, { ...payload, runId: RUN_ID, installId: INSTALL_ID });`,
+    verifyCommands: [
+      `rg "terminal_sent|importRunId|runId: RUN_ID|installId: INSTALL_ID|notifyApp\\(type" -n extension/src/background/index.js`,
+      'git show 88afbafd4b316197a0f0f1b6c85cf43dbe7527f8:extension/src/background/index.js',
+    ],
+  },
 ];
