@@ -1,4 +1,4 @@
-export type ProofProject = 'crm' | 'resell';
+export type ProofProject = 'crm' | 'resell' | 'ai';
 
 export interface ProofItem {
   id: string;
@@ -44,6 +44,16 @@ export const projectProofPacks: Record<
       'Realtime / Coordination Proof',
       'Distributed Locking & State Proof',
       'Reliability Proof (Retries / Idempotency / Dedupe)',
+    ],
+  },
+  ai: {
+    title: 'Fashion Video Pipeline',
+    subsections: [
+      'Pipeline Contract & Runtime Surface',
+      'Deterministic Orchestration & Artifact Lineage',
+      'GPU Runtime & Environment Boundary',
+      'Failure Controls & Recovery Paths',
+      'Traceability, Observability & Safety',
     ],
   },
 };
@@ -1006,6 +1016,437 @@ notifyApp(type, { ...payload, runId: RUN_ID, installId: INSTALL_ID });`,
     verifyCommands: [
       `rg "terminal_sent|importRunId|runId: RUN_ID|installId: INSTALL_ID|notifyApp\\(type" -n extension/src/background/index.js`,
       'git show 88afbafd4b316197a0f0f1b6c85cf43dbe7527f8:extension/src/background/index.js',
+    ],
+  },
+  {
+    id: 'ai-runtime-project-entrypoint',
+    project: 'ai',
+    subsection: 'Pipeline Contract & Runtime Surface',
+    claim: 'Project identity and canonical CLI entrypoint are explicitly declared in packaging metadata.',
+    commit: 'NOT FOUND',
+    file: 'pyproject.toml',
+    lineStart: 1,
+    snippet: `[project]
+name = "fashion_video_pipeline"
+version = "0.1.0"
+requires-python = ">=3.10"
+
+[project.scripts]
+fashion = "cli.main:app"`,
+    verifyCommands: [
+      'nl -ba pyproject.toml',
+      `rg -n "name = \\"fashion_video_pipeline\\"|project\\.scripts|fashion = \\"cli\\.main:app\\"" pyproject.toml`,
+    ],
+  },
+  {
+    id: 'ai-runtime-command-map',
+    project: 'ai',
+    subsection: 'Pipeline Contract & Runtime Surface',
+    claim: 'CLI command routing is explicit and maps each runtime stage to a callable command handler.',
+    commit: 'NOT FOUND',
+    file: 'cli/main.py',
+    lineStart: 1,
+    snippet: `app.command("doctor")(doctor.run)
+app.command("prepare-assets")(prepare_assets.run)
+app.command("train-identity")(train_identity.run)
+app.command("generate-still")(generate_still.run)
+app.command("apply-garment")(apply_tryon.run)
+app.command("render-scene")(render_blender.run)
+app.command("enhance-video")(enhance_video.run)
+app.command("assemble-long-video")(assemble_long_video.run)
+app.command("export")(export.run)`,
+    verifyCommands: [
+      'nl -ba cli/main.py',
+      'rg -n "app.command\\(" cli/main.py',
+    ],
+  },
+  {
+    id: 'ai-runtime-required-run-id',
+    project: 'ai',
+    subsection: 'Pipeline Contract & Runtime Surface',
+    claim: 'Runtime contract enforces a required FVP_RUN_ID and raises on missing value.',
+    commit: 'NOT FOUND',
+    file: 'cli/core/paths.py',
+    lineStart: 1,
+    snippet: `def run_id() -> str:
+    rid = os.environ.get("FVP_RUN_ID", "")
+    if not rid:
+        raise RuntimeError("FVP_RUN_ID is required")
+    return rid`,
+    verifyCommands: [
+      'nl -ba cli/core/paths.py',
+      `rg -n "FVP_RUN_ID|RuntimeError\\(\\"FVP_RUN_ID is required\\"" cli/core/paths.py`,
+    ],
+  },
+  {
+    id: 'ai-runtime-run-scoped-dirs',
+    project: 'ai',
+    subsection: 'Pipeline Contract & Runtime Surface',
+    claim: 'Outputs are guaranteed to be run-scoped under root/kind/run_id with idempotent directory creation.',
+    commit: 'NOT FOUND',
+    file: 'cli/core/paths.py',
+    lineStart: 1,
+    snippet: `def run_dir(kind: str) -> Path:
+    p = root() / kind / run_id()
+    p.mkdir(parents=True, exist_ok=True)
+    return p`,
+    verifyCommands: [
+      'nl -ba cli/core/paths.py',
+      `rg -n "def run_dir|exist_ok=True|root\\(\\) / kind / run_id\\(\\)" cli/core/paths.py`,
+    ],
+  },
+  {
+    id: 'ai-runtime-canonical-sequence',
+    project: 'ai',
+    subsection: 'Pipeline Contract & Runtime Surface',
+    claim: 'Canonical production run path is encoded as a fixed six-stage command sequence.',
+    commit: 'NOT FOUND',
+    file: 'scripts/run_demo.sh',
+    lineStart: 1,
+    snippet: `micromamba run -n fashion_video_env fashion doctor
+micromamba run -n fashion_video_env fashion prepare-assets
+micromamba run -n fashion_video_env fashion apply-garment ...
+micromamba run -n fashion_video_env fashion render-scene ...
+micromamba run -n fashion_video_env fashion enhance-video ...
+micromamba run -n fashion_video_env fashion export ...`,
+    verifyCommands: [
+      'nl -ba scripts/run_demo.sh',
+      'rg -n "fashion (doctor|prepare-assets|apply-garment|render-scene|enhance-video|export)" scripts/run_demo.sh',
+    ],
+  },
+  {
+    id: 'ai-orch-dci-vton-seed-contract',
+    project: 'ai',
+    subsection: 'Deterministic Orchestration & Artifact Lineage',
+    claim: 'DCI-VTON invocation is deterministic through fixed seed, sample count, and canonical input dimensions.',
+    commit: 'NOT FOUND',
+    file: 'cli/core/ai_ops.py',
+    lineStart: 1,
+    snippet: `cmd = [
+  "python", "/home/dom/fashion_video_pipeline/third_party/dci_vton/test.py",
+  "--n_samples", "1",
+  "--seed", "555",
+  "--H", "512",
+  "--W", "512",
+]`,
+    verifyCommands: [
+      'nl -ba cli/core/ai_ops.py',
+      'rg -n "dci_vton/test.py|--n_samples|--seed|--H|--W" cli/core/ai_ops.py',
+    ],
+  },
+  {
+    id: 'ai-orch-generate-still-deterministic',
+    project: 'ai',
+    subsection: 'Deterministic Orchestration & Artifact Lineage',
+    claim: 'Still-generation stage applies fixed seed and deterministic post-run filename replacement.',
+    commit: 'NOT FOUND',
+    file: 'cli/commands/generate_still.py',
+    lineStart: 1,
+    snippet: `out_path = root() / "assets" / "humans" / "prepared" / f"human_prepared_{identity}_run_{run_id()}.png"
+...
+"--seed", "555",
+...
+candidates = sorted(out_path.parent.glob("*.png"))
+if candidates:
+    candidates[0].replace(out_path)`,
+    verifyCommands: [
+      'nl -ba cli/commands/generate_still.py',
+      'rg -n "seed|run_id\\(|candidates\\[0\\]\\.replace" cli/commands/generate_still.py',
+    ],
+  },
+  {
+    id: 'ai-orch-apply-tryon-artifact-name',
+    project: 'ai',
+    subsection: 'Deterministic Orchestration & Artifact Lineage',
+    claim: 'Try-on output naming embeds run_id for stable artifact lineage across stages.',
+    commit: 'NOT FOUND',
+    file: 'cli/commands/apply_tryon.py',
+    lineStart: 1,
+    snippet: `final = out_dir / f"tryon_human_run_{run_id()}.png"
+result.replace(final)`,
+    verifyCommands: [
+      'nl -ba cli/commands/apply_tryon.py',
+      'rg -n "tryon_human_run_|run_id\\(\\)|result\\.replace" cli/commands/apply_tryon.py',
+    ],
+  },
+  {
+    id: 'ai-orch-blender-binary-pinning',
+    project: 'ai',
+    subsection: 'Deterministic Orchestration & Artifact Lineage',
+    claim: 'Rendering stage pins blender binary, scene file, and render script by absolute path.',
+    commit: 'NOT FOUND',
+    file: 'cli/core/blender_ops.py',
+    lineStart: 1,
+    snippet: `BLENDER_BIN = Path("/home/dom/fashion_video_pipeline/blender/project_template/tools/blender-3.6.23-linux-x64/blender")
+cmd = [
+  str(BLENDER_BIN), "-b",
+  "/home/dom/fashion_video_pipeline/blender/project_template/scene_template.blend",
+  "-P", "/home/dom/fashion_video_pipeline/blender/scripts/render_headless.py",
+]`,
+    verifyCommands: [
+      'nl -ba cli/core/blender_ops.py',
+      'rg -n "blender-3\\.6\\.23|scene_template\\.blend|render_headless\\.py" cli/core/blender_ops.py',
+    ],
+  },
+  {
+    id: 'ai-orch-render-frame-contract',
+    project: 'ai',
+    subsection: 'Deterministic Orchestration & Artifact Lineage',
+    claim: 'Render stage derives deterministic frame boundaries from duration and FPS contract.',
+    commit: 'NOT FOUND',
+    file: 'blender/scripts/render_headless.py',
+    lineStart: 1,
+    snippet: `scene.render.fps = args.fps
+w, h = args.resolution.split("x")
+scene.render.resolution_x = int(w)
+scene.render.resolution_y = int(h)
+frame_count = args.duration_seconds * args.fps
+scene.frame_start = 1
+scene.frame_end = frame_count`,
+    verifyCommands: [
+      'nl -ba blender/scripts/render_headless.py',
+      'rg -n "fps|resolution|frame_count|frame_end" blender/scripts/render_headless.py',
+    ],
+  },
+  {
+    id: 'ai-orch-export-preset-contract',
+    project: 'ai',
+    subsection: 'Deterministic Orchestration & Artifact Lineage',
+    claim: 'Export stage is preset-driven and emits deterministic output pathing from profile configuration.',
+    commit: 'NOT FOUND',
+    file: 'cli/commands/export.py',
+    lineStart: 1,
+    snippet: `cfg = load_preset(preset)
+out_dir = run_dir("exports")
+out_path = out_dir / f"export_{preset}_run_{run_id()}.mp4"
+run_ffmpeg_export(input, str(out_path), cfg["resolution"], cfg["fps"], cfg["crf"], cfg["preset"])`,
+    verifyCommands: [
+      'nl -ba cli/commands/export.py',
+      'rg -n "load_preset|export_.*run_|run_ffmpeg_export" cli/commands/export.py',
+    ],
+  },
+  {
+    id: 'ai-gpu-doctor-dxg-check',
+    project: 'ai',
+    subsection: 'GPU Runtime & Environment Boundary',
+    claim: 'Doctor command enforces WSL GPU passthrough by requiring /dev/dxg visibility.',
+    commit: 'NOT FOUND',
+    file: 'cli/commands/doctor.py',
+    lineStart: 1,
+    snippet: `if not wsl.has_dxg():
+    print("FAIL: /dev/dxg")
+    sys.exit(1)`,
+    verifyCommands: [
+      'nl -ba cli/commands/doctor.py',
+      'rg -n "dxg|FAIL: /dev/dxg|sys.exit\\(1\\)" cli/commands/doctor.py',
+    ],
+  },
+  {
+    id: 'ai-gpu-doctor-rocm-version-gate',
+    project: 'ai',
+    subsection: 'GPU Runtime & Environment Boundary',
+    claim: 'Doctor command hard-gates runtime on expected ROCm torch version prefix.',
+    commit: 'NOT FOUND',
+    file: 'cli/commands/doctor.py',
+    lineStart: 1,
+    snippet: `if not torch.__version__.startswith("2.6.0+rocm6.4.2"):
+    print("FAIL: ROCm userland")
+    sys.exit(1)`,
+    verifyCommands: [
+      'nl -ba cli/commands/doctor.py',
+      'rg -n "torch.__version__|rocm6\\.4\\.2|FAIL: ROCm userland" cli/commands/doctor.py',
+    ],
+  },
+  {
+    id: 'ai-gpu-explicit-device-selection',
+    project: 'ai',
+    subsection: 'GPU Runtime & Environment Boundary',
+    claim: 'Try-on model invocation explicitly selects GPU device 0.',
+    commit: 'NOT FOUND',
+    file: 'cli/core/ai_ops.py',
+    lineStart: 1,
+    snippet: `"python", "/home/dom/fashion_video_pipeline/third_party/dci_vton/test.py",
+"--plms", "--gpu_id", "0",
+"--ddim_steps", str(steps),`,
+    verifyCommands: [
+      'nl -ba cli/core/ai_ops.py',
+      'rg -n "--gpu_id|dci_vton/test.py" cli/core/ai_ops.py',
+    ],
+  },
+  {
+    id: 'ai-gpu-vram-helper-boundary',
+    project: 'ai',
+    subsection: 'GPU Runtime & Environment Boundary',
+    claim: 'GPU memory boundary helper is implemented via direct device property introspection.',
+    commit: 'NOT FOUND',
+    file: 'cli/core/gpu.py',
+    lineStart: 1,
+    snippet: `import torch
+
+def vram_gb() -> int:
+    return int(torch.cuda.get_device_properties(0).total_memory / (1024**3))`,
+    verifyCommands: [
+      'nl -ba cli/core/gpu.py',
+      'rg -n "get_device_properties\\(0\\)|total_memory" cli/core/gpu.py',
+    ],
+  },
+  {
+    id: 'ai-gpu-rocm-pinned-requirements',
+    project: 'ai',
+    subsection: 'GPU Runtime & Environment Boundary',
+    claim: 'ROCm dependency boundary is encoded with pinned framework versions and ROCm-specific wheel sources.',
+    commit: 'NOT FOUND',
+    file: 'third_party/kohya_ss/requirements_linux_rocm.txt',
+    lineStart: 1,
+    snippet: `--extra-index-url https://download.pytorch.org/whl/rocm6.3
+--find-links https://repo.radeon.com/rocm/manylinux/rocm-rel-6.4.1
+torch==2.7.1+rocm6.3
+torchvision==0.22.1+rocm6.3
+onnxruntime-rocm==1.21.0`,
+    verifyCommands: [
+      'nl -ba third_party/kohya_ss/requirements_linux_rocm.txt',
+      'rg -n "rocm|torch==|onnxruntime-rocm" third_party/kohya_ss/requirements_linux_rocm.txt',
+    ],
+  },
+  {
+    id: 'ai-failure-enhance-forced-fallback',
+    project: 'ai',
+    subsection: 'Failure Controls & Recovery Paths',
+    claim: 'Enhancement stage supports deterministic forced fallback mode for operational recovery.',
+    commit: 'NOT FOUND',
+    file: 'cli/commands/enhance_video.py',
+    lineStart: 1,
+    snippet: `if force_fallback == "ffmpeg_grade":
+    run_ffmpeg_fallback(input, str(out_path))
+    print("Enhancement complete")
+    return`,
+    verifyCommands: [
+      'nl -ba cli/commands/enhance_video.py',
+      'rg -n "force_fallback|ffmpeg_grade|run_ffmpeg_fallback" cli/commands/enhance_video.py',
+    ],
+  },
+  {
+    id: 'ai-failure-enhance-exception-fallback',
+    project: 'ai',
+    subsection: 'Failure Controls & Recovery Paths',
+    claim: 'Enhancement stage degrades to ffmpeg fallback when primary model inference fails.',
+    commit: 'NOT FOUND',
+    file: 'cli/commands/enhance_video.py',
+    lineStart: 1,
+    snippet: `try:
+    run_hummingbird_xt(input, str(out_path), cfg["num_inference_steps"], cfg["diffusion_strength"])
+except Exception:
+    run_ffmpeg_fallback(input, str(out_path))`,
+    verifyCommands: [
+      'nl -ba cli/commands/enhance_video.py',
+      'rg -n "run_hummingbird_xt|except Exception|run_ffmpeg_fallback" cli/commands/enhance_video.py',
+    ],
+  },
+  {
+    id: 'ai-failure-doctor-fail-fast',
+    project: 'ai',
+    subsection: 'Failure Controls & Recovery Paths',
+    claim: 'Doctor stage exits non-zero on missing GPU/runtime prerequisites.',
+    commit: 'NOT FOUND',
+    file: 'cli/commands/doctor.py',
+    lineStart: 1,
+    snippet: `if not blender.exists():
+    print("FAIL: Blender")
+    sys.exit(1)
+...
+except Exception:
+    print("FAIL: ffmpeg")
+    sys.exit(1)`,
+    verifyCommands: [
+      'nl -ba cli/commands/doctor.py',
+      'rg -n "FAIL: Blender|FAIL: ffmpeg|sys.exit\\(1\\)" cli/commands/doctor.py',
+    ],
+  },
+  {
+    id: 'ai-failure-assemble-input-guard',
+    project: 'ai',
+    subsection: 'Failure Controls & Recovery Paths',
+    claim: 'Assembly stage hard-fails when no input videos are present.',
+    commit: 'NOT FOUND',
+    file: 'cli/commands/assemble_long_video.py',
+    lineStart: 1,
+    snippet: `vids = sorted(Path(input_dir).glob("*.mp4"))
+if not vids:
+    raise FileNotFoundError("No input videos found")`,
+    verifyCommands: [
+      'nl -ba cli/commands/assemble_long_video.py',
+      'rg -n "No input videos found|glob\\(\"\\*\\.mp4\"\\)" cli/commands/assemble_long_video.py',
+    ],
+  },
+  {
+    id: 'ai-failure-subprocess-check-true',
+    project: 'ai',
+    subsection: 'Failure Controls & Recovery Paths',
+    claim: 'Core execution paths use subprocess check=True so command failures propagate immediately.',
+    commit: 'NOT FOUND',
+    file: 'cli/core/ai_ops.py',
+    lineStart: 1,
+    snippet: `subprocess.run(cmd, check=True)
+...
+subprocess.run([
+    "ffmpeg", "-y", "-i", input_video,
+    "-vf", "eq=contrast=1.1:saturation=1.05:brightness=0.02,unsharp=3:3:0.5:3:3:0.0",
+    "-c:v", "libx264", "-crf", "18", "-preset", "slow",
+    output_video,
+], check=True)`,
+    verifyCommands: [
+      'nl -ba cli/core/ai_ops.py',
+      'rg -n "subprocess.run\\(.*check=True|ffmpeg" cli/core/ai_ops.py',
+    ],
+  },
+  {
+    id: 'ai-trace-structured-logger-available',
+    project: 'ai',
+    subsection: 'Traceability, Observability & Safety',
+    claim: 'Structured UTC logging helper exists for pipeline runtime instrumentation.',
+    commit: 'NOT FOUND',
+    file: 'cli/core/logging.py',
+    lineStart: 1,
+    snippet: `def log(msg: str) -> None:
+    ts = datetime.utcnow().isoformat() + "Z"
+    print(f"[FVP {ts}] {msg}")`,
+    verifyCommands: [
+      'nl -ba cli/core/logging.py',
+      'rg -n "utcnow|\\[FVP" cli/core/logging.py',
+    ],
+  },
+  {
+    id: 'ai-trace-runid-output-correlation',
+    project: 'ai',
+    subsection: 'Traceability, Observability & Safety',
+    claim: 'Run correlation is embedded in generated artifact names across render and enhancement stages.',
+    commit: 'NOT FOUND',
+    file: 'blender/scripts/render_headless.py',
+    lineStart: 1,
+    snippet: `run_id = os.environ.get("FVP_RUN_ID", "run")
+out_path = out_dir / f"render_{args.scene}_run_{run_id}.mp4"`,
+    verifyCommands: [
+      'nl -ba blender/scripts/render_headless.py',
+      'rg -n "run_\\{|FVP_RUN_ID|render_.*_run_" blender/scripts/render_headless.py cli/commands/enhance_video.py',
+    ],
+  },
+  {
+    id: 'ai-safety-subprocess-argv-usage',
+    project: 'ai',
+    subsection: 'Traceability, Observability & Safety',
+    claim: 'Media execution commands use argv-style subprocess invocation rather than shell interpolation.',
+    commit: 'NOT FOUND',
+    file: 'cli/core/video_ops.py',
+    lineStart: 1,
+    snippet: `subprocess.run([
+  "ffmpeg", "-y", "-i", input_path,
+  "-vf", f"scale={w}:{h},fps={fps}",
+  "-c:v", "libx264", "-crf", str(crf), "-preset", preset,
+  output_path
+], check=True)`,
+    verifyCommands: [
+      'nl -ba cli/core/video_ops.py',
+      'rg -n "subprocess.run\\(\\[|ffmpeg" cli/core/video_ops.py cli/core/ai_ops.py',
     ],
   },
 ];

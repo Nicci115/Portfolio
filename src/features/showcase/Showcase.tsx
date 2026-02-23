@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { portfolio } from '@/content/portfolio';
-import { proofItems, ProofItem, projectProofPacks, ProofProject } from '@/data/proofPacks';
+import { proofItems, projectProofPacks, ProofProject } from '@/data/proofPacks';
 import { Section } from '@/components/ui/Section';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -32,10 +32,14 @@ export const Showcase = () => {
     setActiveSubsection(prev => prev === sub ? null : sub);
   };
 
-  const getProjectProofKey = (projectName: string): string => {
+  const getProjectProofKey = (projectName: string): ProofProject | '' => {
     if (projectName.toLowerCase().includes('crm')) return 'crm';
     if (projectName.toLowerCase().includes('resell')) return 'resell';
-    if (projectName.toLowerCase().includes('gpu') || projectName.toLowerCase().includes('ai')) return 'ai-lab';
+    if (
+      projectName.toLowerCase().includes('gpu') ||
+      projectName.toLowerCase().includes('ai') ||
+      projectName.toLowerCase().includes('fashion video')
+    ) return 'ai';
     return '';
   };
 
@@ -91,7 +95,7 @@ export const Showcase = () => {
         <motion.div variants={fadeInUp} className="space-y-4 max-w-2xl">
           <h2 className="text-3xl font-bold text-zinc-100">Systems Portfolio</h2>
           <p className="text-zinc-500">
-            Distributed systems, automation boundaries, and infrastructure experiments built for
+            Distributed systems, automation boundaries, and infrastructure pipelines built for
             production reality.
           </p>
         </motion.div>
@@ -306,100 +310,88 @@ export const Showcase = () => {
                           </div>
                         ) : (
                           <div className="mt-5 pb-6 space-y-4">
-                            {getProjectProofKey(project.name) === 'ai-lab' ? (
-                              <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-950/40 p-12 text-center">
-                                <div className="mx-auto w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
-                                  <Terminal className="w-6 h-6 text-zinc-500" />
-                                </div>
-                                <h4 className="text-zinc-200 font-medium mb-1">Evidence Pending Verification</h4>
-                                <p className="text-sm text-zinc-500 max-w-sm mx-auto">
-                                  I am currently finalizing the audit and QA documentation for the ROCm/Docker infrastructure lab. Check back soon for the verified proof pack.
-                                </p>
-                              </div>
-                            ) : (
-                              <div className="space-y-3">
-                                {projectProofPacks[getProjectProofKey(project.name) as ProofProject]?.subsections.map((subName) => {
-                                  const items = proofItems.filter(
-                                    (i) => i.project === getProjectProofKey(project.name) && i.subsection === subName
-                                  );
-                                  const isOpen = activeSubsection === subName;
+                            <div className="space-y-3">
+                              {projectProofPacks[getProjectProofKey(project.name) as ProofProject]?.subsections.map((subName) => {
+                                const items = proofItems.filter(
+                                  (i) => i.project === getProjectProofKey(project.name) && i.subsection === subName
+                                );
+                                const isOpen = activeSubsection === subName;
 
-                                  return (
-                                    <div key={subName} className="rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden">
-                                      <button
-                                        onClick={() => toggleSubsection(subName)}
-                                        className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
-                                          isOpen ? 'bg-zinc-800/40 text-accent' : 'text-zinc-300 hover:bg-zinc-800/20'
-                                        }`}
-                                      >
-                                        <div className="flex items-center gap-3">
-                                          <div className={`w-1.5 h-1.5 rounded-full ${items.length > 0 ? 'bg-accent' : 'bg-zinc-600'}`} />
-                                          <span className="text-sm font-medium">{subName}</span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                          <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
-                                            {items.length} {items.length === 1 ? 'Proof' : 'Proofs'}
-                                          </span>
-                                          <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                                        </div>
-                                      </button>
+                                return (
+                                  <div key={subName} className="rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden">
+                                    <button
+                                      onClick={() => toggleSubsection(subName)}
+                                      className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
+                                        isOpen ? 'bg-zinc-800/40 text-accent' : 'text-zinc-300 hover:bg-zinc-800/20'
+                                      }`}
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <div className={`w-1.5 h-1.5 rounded-full ${items.length > 0 ? 'bg-accent' : 'bg-zinc-600'}`} />
+                                        <span className="text-sm font-medium">{subName}</span>
+                                      </div>
+                                      <div className="flex items-center gap-3">
+                                        <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+                                          {items.length} {items.length === 1 ? 'Proof' : 'Proofs'}
+                                        </span>
+                                        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                                      </div>
+                                    </button>
 
-                                      <AnimatePresence>
-                                        {isOpen && (
-                                          <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            transition={{ duration: 0.2 }}
-                                          >
-                                            <div className="px-4 pb-4 pt-2 space-y-4 border-t border-zinc-800/50">
-                                              {items.length > 0 ? (
-                                                items.map((item) => (
-                                                  <div key={item.id} className="rounded-lg border border-zinc-800 bg-zinc-950 p-4 space-y-3">
-                                                    <div className="flex items-start justify-between gap-4">
-                                                      <p className="text-sm text-zinc-200 font-medium leading-relaxed">
-                                                        {item.claim}
-                                                      </p>
-                                                      <div className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-1 rounded shrink-0">
-                                                        {item.commit.slice(0, 7)}
-                                                      </div>
-                                                    </div>
-                                                    
-                                                    <div className="relative group">
-                                                      <div className="absolute top-2 right-2 flex gap-2">
-                                                        <span className="text-[10px] font-mono text-zinc-500 bg-zinc-950/80 backdrop-blur-sm px-2 py-1 rounded border border-zinc-800">
-                                                          {item.file}
-                                                        </span>
-                                                      </div>
-                                                      <pre className="text-[11px] text-zinc-400 bg-zinc-900/50 p-3 rounded border border-zinc-800 overflow-x-auto font-mono scrollbar-thin scrollbar-thumb-zinc-800">
-                                                        <code>{item.snippet}</code>
-                                                      </pre>
-                                                    </div>
-
-                                                    <div className="flex flex-wrap gap-2">
-                                                      {item.verifyCommands.map((cmd, i) => (
-                                                        <div key={i} className="flex items-center gap-2 text-[10px] font-mono text-zinc-500 bg-zinc-950 border border-zinc-800 rounded px-2 py-1">
-                                                          <Terminal className="w-3 h-3 text-accent/50" />
-                                                          <span className="truncate max-w-[250px]">{cmd}</span>
-                                                        </div>
-                                                      ))}
+                                    <AnimatePresence>
+                                      {isOpen && (
+                                        <motion.div
+                                          initial={{ height: 0, opacity: 0 }}
+                                          animate={{ height: 'auto', opacity: 1 }}
+                                          exit={{ height: 0, opacity: 0 }}
+                                          transition={{ duration: 0.2 }}
+                                        >
+                                          <div className="px-4 pb-4 pt-2 space-y-4 border-t border-zinc-800/50">
+                                            {items.length > 0 ? (
+                                              items.map((item) => (
+                                                <div key={item.id} className="rounded-lg border border-zinc-800 bg-zinc-950 p-4 space-y-3">
+                                                  <div className="flex items-start justify-between gap-4">
+                                                    <p className="text-sm text-zinc-200 font-medium leading-relaxed">
+                                                      {item.claim}
+                                                    </p>
+                                                    <div className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-1 rounded shrink-0">
+                                                      {item.commit.slice(0, 7)}
                                                     </div>
                                                   </div>
-                                                ))
-                                              ) : (
-                                                <div className="py-4 text-center">
-                                                  <p className="text-xs text-zinc-600 italic">No specific code proof has been mapped for this subsection yet.</p>
+                                                  
+                                                  <div className="relative group">
+                                                    <div className="absolute top-2 right-2 flex gap-2">
+                                                      <span className="text-[10px] font-mono text-zinc-500 bg-zinc-950/80 backdrop-blur-sm px-2 py-1 rounded border border-zinc-800">
+                                                        {item.file}
+                                                      </span>
+                                                    </div>
+                                                    <pre className="text-[11px] text-zinc-400 bg-zinc-900/50 p-3 rounded border border-zinc-800 overflow-x-auto font-mono scrollbar-thin scrollbar-thumb-zinc-800">
+                                                      <code>{item.snippet}</code>
+                                                    </pre>
+                                                  </div>
+
+                                                  <div className="flex flex-wrap gap-2">
+                                                    {item.verifyCommands.map((cmd, i) => (
+                                                      <div key={i} className="flex items-center gap-2 text-[10px] font-mono text-zinc-500 bg-zinc-950 border border-zinc-800 rounded px-2 py-1">
+                                                        <Terminal className="w-3 h-3 text-accent/50" />
+                                                        <span className="truncate max-w-[250px]">{cmd}</span>
+                                                      </div>
+                                                    ))}
+                                                  </div>
                                                 </div>
-                                              )}
-                                            </div>
-                                          </motion.div>
-                                        )}
-                                      </AnimatePresence>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
+                                              ))
+                                            ) : (
+                                              <div className="py-4 text-center">
+                                                <p className="text-xs text-zinc-600 italic">No specific code proof has been mapped for this subsection yet.</p>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </motion.div>
+                                      )}
+                                    </AnimatePresence>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         )}
                       </motion.div>

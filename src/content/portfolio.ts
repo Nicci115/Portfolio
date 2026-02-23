@@ -235,14 +235,14 @@ export const portfolio: PortfolioData = {
       ],
     },
     {
-      name: 'GPU / AI Docker Lab (ROCm + Model Orchestration Experimentation)',
-      status: 'Active Infrastructure Experimentation',
+      name: 'Fashion Video Pipeline (Local GPU Inference Runtime)',
+      status: 'Private Runtime Proof Pack',
       oneLiner:
-        'Dockerized experimentation stack for ROCm-era model orchestration, diffusion workflows, and repeatable GPU inference pipelines on consumer hardware.',
+        'Deterministic CLI pipeline for local try-on inference, Blender rendering, enhancement fallback, and export with run-scoped artifact lineage.',
       problem:
-        'AI model experimentation on consumer GPUs is fragile due to driver mismatches, dependency conflicts, and inconsistent CUDA/ROCm ecosystems.',
+        'Generating repeatable fashion media on consumer GPUs breaks easily without strict run contracts, deterministic stage wiring, and explicit ROCm/runtime checks.',
       outcome:
-        'Built a Docker + Conda/ Micromamba environment for orchestrating LLMs, diffusion models, and Blender automation workflows while investigating GPU driver constraints.',
+        'Built a production-style local inference runtime with fixed command surface, fail-fast guardrails, deterministic naming, and reproducible run-scoped outputs.',
       architecture: {
         serviceBreakdown: [
           'Host OS and AMD GPU runtime',
@@ -270,25 +270,25 @@ export const portfolio: PortfolioData = {
         automation: ['CLI orchestration scripts', 'Blender automation', 'Subprocess pipelines'],
       },
       engineeringChallenges: [
-        'ROCm vs CUDA incompatibility constraints on AMD hardware.',
-        'Version pinning conflicts across PyTorch, transformers, and diffusion libraries.',
-        'Subprocess orchestration between model pipelines and rendering tools.',
-        'Debugging container GPU passthrough issues.',
-        'Managing multiple Python environments across CLI workflows.',
-        'Handling VRAM fragmentation and memory errors during inference.',
+        'Enforcing deterministic output lineage across multi-stage model/render commands.',
+        'Maintaining stable ROCm runtime behavior on consumer AMD hardware.',
+        'Designing fail-fast command boundaries with explicit fallback paths.',
+        'Coordinating subprocess-based model and ffmpeg execution without silent failures.',
+        'Keeping run contracts strict while supporting CLI-first operator workflows.',
+        'Managing dependency drift across Docker, Micromamba, and pinned runtime packages.',
       ],
       scalingConsiderations: [
-        'GPU memory limits vs model size.',
-        'Container layering and image size management.',
-        'Model caching strategy.',
-        'CLI-first orchestration for reproducibility.',
-        'Dependency drift across updates.',
+        'VRAM budget constraints vs model profile selection.',
+        'Artifact storage growth across run-scoped outputs.',
+        'Cold-start overhead from heavyweight model dependencies.',
+        'Reproducibility guarantees under dependency updates.',
+        'Parallel stage scheduling for multi-run throughput.',
       ],
       refactorNext: [
-        'Introduce reproducible environment lockfiles for every model stack.',
-        'Build a unified orchestration CLI wrapper.',
-        'Separate inference workloads into isolated containers.',
-        'Add lightweight monitoring for GPU utilization.',
+        'Adopt a populated lock strategy for first-party runtime dependencies.',
+        'Add structured stage-level telemetry with run correlation fields.',
+        'Introduce timeout/retry policy wrappers around subprocess stages.',
+        'Define artifact retention and pruning policy for long-term operations.',
       ],
     },
   ],
@@ -328,7 +328,7 @@ export const portfolio: PortfolioData = {
   },
   proofOfWork: {
     positioning:
-      'I build control-plane and execution-plane systems for real business workflows, browser automation, and GPU-heavy experimentation.',
+      'I build control-plane and execution-plane systems for real business workflows, browser automation, and GPU-heavy local inference pipelines.',
     buildScope: [
       'Owns end-to-end delivery: architecture, implementation, deployment, and operational debugging.',
       'Designs around failure states first: retries, locks, idempotency, and state reconciliation.',
