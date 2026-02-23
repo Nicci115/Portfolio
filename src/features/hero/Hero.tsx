@@ -1,4 +1,3 @@
-import React from 'react';
 import { portfolio } from '@/content/portfolio';
 import { Section } from '@/components/ui/Section';
 import { motion } from 'framer-motion';
