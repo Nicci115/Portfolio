@@ -38,7 +38,7 @@ export const Contact = () => {
         <motion.div variants={fadeInUp} className="text-center space-y-4">
           <h2 className="text-4xl font-bold text-zinc-100">Work with me</h2>
           <p className="text-zinc-400 text-lg">
-            I am open to freelance, consulting, partnerships, and serious engineering roles.
+            I am open to freelance, contract, and serious engineering roles.
           </p>
         </motion.div>
 

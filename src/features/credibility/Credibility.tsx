@@ -11,7 +11,7 @@ export const Credibility = () => {
     <Section id="credibility">
       <div className="space-y-12">
         <motion.div variants={fadeInUp} className="space-y-3 max-w-3xl">
-          <h2 className="text-3xl font-bold text-zinc-100">Proof of Work</h2>
+          <h2 className="text-3xl font-bold text-zinc-100">More About Me</h2>
           <p className="text-zinc-400 leading-relaxed">{proofOfWork.positioning}</p>
         </motion.div>
 
@@ -19,7 +19,7 @@ export const Credibility = () => {
           <motion.div variants={fadeInUp}>
             <div className="flex items-center gap-2 mb-4">
               <ShieldCheck className="w-5 h-5 text-accent" />
-              <h3 className="text-xl font-bold text-zinc-100">Execution Profile</h3>
+              <h3 className="text-xl font-bold text-zinc-100">Development Profile</h3>
             </div>
 
             <div className="space-y-5">
@@ -30,7 +30,7 @@ export const Credibility = () => {
 
               <div>
                 <p className="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">
-                  What I Build
+                  How I Think About Systems
                 </p>
                 <ul className="space-y-2">
                   {proofOfWork.buildScope.map((item) => (
@@ -44,7 +44,7 @@ export const Credibility = () => {
 
               <div>
                 <p className="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">
-                  What I Don&apos;t Build
+                 What I Avoid
                 </p>
                 <ul className="space-y-2">
                   {proofOfWork.antiScope.map((item) => (

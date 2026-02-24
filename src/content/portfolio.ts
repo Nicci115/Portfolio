@@ -292,16 +292,16 @@ export const portfolio: PortfolioData = {
       ],
     },
   ],
-  systemsMindset: [
-    'I design explicit control-plane vs execution-plane boundaries so configuration cannot directly mutate live automation state.',
-    'I treat idempotency as a first-class requirement for async jobs, webhooks, and workflow retries.',
-    'I design around failure modes first: partial outages, stale sessions, duplicate triggers, and retry storms - not the happy path.',
-    'I prioritize observability early with structured events, traceable job IDs, and logs that explain causality - not just symptoms.',
-    'I design for distributed coordination, not single-process assumptions, using explicit locks, leases, and state ownership rules.',
-    'I enforce version pinning and reproducible environments to reduce dependency drift across infra and AI workflows.',
-    'I bias toward automation-first operations: repeatable provisioning, scripted workflows, and zero manual recovery dependencies.',
-    'I separate UI state from backend execution state so real-time dashboards reflect truth instead of optimistic guesses.',
-  ],
+ systemsMindset: [
+  'I bias toward system integrity over feature velocity. Weak foundations compound failure.',
+  'I assume duplication, retries, and race conditions will happen and design so they do not corrupt state.',
+  'I separate configuration from execution so live automation cannot be mutated accidentally.',
+  'I make state ownership explicit so no process updates data without clear responsibility.',
+  'I design for distributed coordination even when a single-process solution would be easier.',
+  'I treat authentication, authorization (RBAC), and route boundaries as architectural concerns, not middleware details.',
+  'I treat AI as a collaborator, not a source of truth. Guardrails and human oversight are part of the system.',
+  'I prefer observable systems with traceable logs and clear causality over systems that “usually work.”',
+],
   skills: {
     frontend: ['React', 'TypeScript', 'Tailwind CSS', 'Vite'],
     backend: ['Node.js', 'Express', 'Supabase', 'PostgreSQL', 'Redis', 'Python', 'Rust'],
@@ -326,57 +326,68 @@ export const portfolio: PortfolioData = {
       'Dockerized model orchestration',
     ],
   },
-  proofOfWork: {
-    positioning:
-      'I build control-plane and execution-plane systems for real business workflows, browser automation, and GPU-heavy local inference pipelines.',
-    buildScope: [
-      'Owns end-to-end delivery: architecture, implementation, deployment, and operational debugging.',
-      'Designs around failure states first: retries, locks, idempotency, and state reconciliation.',
-      'Builds multi-service systems with clear boundaries between UI orchestration and execution agents.',
-      'Ships private production systems, not demo-only repos.',
-      'Works across app layer and infrastructure layer, including Dockerized AI environments.',
-    ],
-    antiScope: [
-      'I do not build tutorial clones or portfolio-only toy apps.',
-      'I do not optimize for UI polish while ignoring systems reliability and operational constraints.',
-    ],
+ proofOfWork: {
+positioning:
+  'My bias is toward execution integrity. I assume systems will fail under edge conditions and design accordingly. Clear state, explicit coordination, and isolation between orchestration and execution layers are non-negotiable.',
+
+buildScope: [
+  'I treat AI models as probabilistic components and wrap them with validation, retries, and guardrails.',
+  'I design workflows with human-in-the-loop checkpoints when stakes are high.',
+  'Orchestration logic is separated from execution logic to prevent cascading failure.',
+  'External APIs are assumed to be unstable; state transitions are explicit and observable.',
+  'Security boundaries matter! Scoped access, RBAC, and proper route handling are baseline concerns.',
+  'Silent failure is unacceptable; observability and logging are built in from the start.',
+],
+
+antiScope: [
+  'Shipping systems without explicit state control, observability, and version discipline.',
+  'Relying on AI output without validation, fallback paths, or human oversight.',
+  'Introducing architecture decisions that compromise long-term maintainability for short-term velocity.',
+],
   },
   bio: {
-    technical:
-      'Background in automation and systems programming across Rust, Python, Solidity, and Node-based distributed services. Current work centers on orchestrated SaaS platforms, browser execution agents, and GPU-first AI infrastructure.',
-    founder:
-      'Since launching client-focused systems work in 2024, I have prioritized software that reduces manual operations and survives real production constraints.',
+  technical:
+    'What started as crypto experimentation became an obsession with execution logic. Backend-heavy systems taught me that state, timing, and coordination matter more than surface-level features.',
+
+   founder:
+  'Around 2023–2024, I stopped thinking purely in crypto-native systems and started thinking in general software systems. Instead of bots and contracts, I was designing applications, APIs, user interfaces, and automation that had to work outside of blockchain constraints.',
+},
+   timeline: [
+  {
+    year: '2019',
+    title: 'Entered crypto markets as an investor.',
+    description:
+      'Exposure to token mechanics, decentralized systems, and market volatility sparked interest in automation and programmable logic.',
   },
-  timeline: [
-    {
-      year: '2022',
-      title: 'Self-taught foundations: on-chain bots and RTP game experiments',
-      description:
-        'Began building in Rust, Python, and Solidity through trading bot workflows and casino game logic centered on RTP mechanics.',
-    },
-    {
-      year: '2023',
-      title: 'Shift to structured crypto tooling and blockchain game workflows',
-      description:
-        'Built more serious small-scope systems for blockchain game operations and automation-driven execution.',
-    },
-    {
-      year: '2024',
-      title: 'Started business buildout and moved into multi-service product systems',
-      description:
-        'Transitioned from isolated experiments to production architecture work, establishing foundations for the Resell Tool and Real Estate CRM.',
-    },
-    {
-      year: '2025',
-      title: 'Operationalized distributed automation patterns',
-      description:
-        'Implemented control-plane and execution-plane boundaries, WebSocket coordination, and automation reliability practices across active systems.',
-    },
-    {
-      year: '2026',
-      title: 'Current focus: systems builder across SaaS, automation, and GPU labs',
-      description:
-        'Actively iterating on private architecture systems and ROCm-based AI orchestration environments with deployment-grade discipline.',
-    },
-  ],
+  {
+    year: '2022',
+    title: 'Built crypto trading bots and smart contract experiments.',
+    description:
+      'Focused on backend-heavy systems in Rust, Python, and Solidity. Learned through execution failures how state, timing, and randomness expose weak assumptions.',
+  },
+  {
+    year: '2023',
+    title: 'Expanded into API integrations and connected automation.',
+    description:
+      'Began coordinating external APIs and structured data pipelines. Shifted from isolated scripts to systems with real dependencies.',
+  },
+  {
+    year: '2024',
+    title: 'Leveled into full-stack development and discovered orchestration.',
+    description:
+      'Built more complete applications with defined frontend and backend layers. Introduced n8n and began designing event-driven workflows.',
+  },
+  {
+    year: '2025',
+    title: 'Built agentic automation systems.',
+    description:
+      'Designed multi-step workflows coordinating APIs, AI models, databases, and messaging layers. Moved into structured orchestration rather than single-purpose tools.',
+  },
+  {
+    year: '2026',
+    title: 'Operating across SaaS infrastructure and AI-driven systems.',
+    description:
+      'Combining orchestration, browser automation, and GPU-backed AI environments into more durable multi-service architectures.',
+  },
+],
 };
