@@ -101,7 +101,7 @@ import banner from '@/assets/TABanner.jpeg';
 export const portfolio: PortfolioData = {
   identity: {
     name: 'Dominic Milburn',
-    title: 'Founder / Full-Stack Engineer',
+    title: 'DevOps / Full-Stack Engineer',
     tagline: 'Automation Engineer (AI + Systems)',
     location: 'Missouri, USA',
     mission:
@@ -299,7 +299,7 @@ export const portfolio: PortfolioData = {
   'I make state ownership explicit so no process updates data without clear responsibility.',
   'I design for distributed coordination even when a single-process solution would be easier.',
   'I treat authentication, authorization (RBAC), and route boundaries as architectural concerns, not middleware details.',
-  'I treat AI as a collaborator, not a source of truth. Guardrails and human oversight are part of the system.',
+  'I treat AI as a collaborator for certain tasks, not a source of truth. Guardrails and human oversight are part of the system.',
   'I prefer observable systems with traceable logs and clear causality over systems that “usually work.”',
 ],
   skills: {
